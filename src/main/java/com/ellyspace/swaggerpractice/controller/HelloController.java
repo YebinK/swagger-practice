@@ -2,9 +2,11 @@ package com.ellyspace.swaggerpractice.controller;
 
 import com.ellyspace.swaggerpractice.service.HelloRequest;
 import com.ellyspace.swaggerpractice.service.HelloService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/v1/hello")
+@RestController
+@RequestMapping("/v1/hello/")
 public class HelloController {
 
     private final HelloService helloService;
@@ -14,16 +16,19 @@ public class HelloController {
     }
 
     @GetMapping
+    @ApiOperation(value = "GET Sample", tags = "sample")
     public String helloGet() {
         return "hello";
     }
 
     @PostMapping("/new")
+    @ApiOperation(value = "POST Sample", tags = "sample")
     public Long helloPost(@RequestBody HelloRequest request) {
         return helloService.post(request);
     }
 
     @DeleteMapping("/{id}")
+    @ApiOperation(value = "DELETE Sample", tags = "sample")
     public void helloDelete(@PathVariable Long id) {
         helloService.delete(id);
     }

@@ -5,13 +5,10 @@ import com.fasterxml.classmate.TypeResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.builders.ResponseBuilder;
-import springfox.documentation.schema.ScalarType;
 import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
@@ -31,9 +28,18 @@ public class SwaggerConfig {
     @Autowired
     private TypeResolver typeResolver;
 
+    private ApiInfo apiInfoBuilder() {
+        return new ApiInfoBuilder()
+                .title("hello demo")
+                .description("lets practice")
+                .build();
+    }
+
     @Bean
     public Docket getDocket() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .groupName("practice")
+                .apiInfo(apiInfoBuilder())
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
@@ -42,30 +48,9 @@ public class SwaggerConfig {
                 .directModelSubstitute(LocalDate.class, String.class)
                 .genericModelSubstitutes(ResponseEntity.class)
                 .useDefaultResponseMessages(false)
-                .globalResponses(HttpMethod.GET,
-                        singletonList(new ResponseBuilder()
-                                .code("500")
-                                .description("500 message")
-                                .representation(MediaType.TEXT_XML)
-                                .apply(r ->
-                                        r.model(m ->
-                                                m.referenceModel(ref ->
-                                                        ref.key(k ->
-                                                                k.qualifiedModelName(q ->
-                                                                        q.namespace("some:namespace")
-                                                                                .name("ERROR"))))))
-                                .build()))
                 .securitySchemes(singletonList(apiKey()))
                 .securityContexts(singletonList(securityContext()))
                 .enableUrlTemplating(true)
-                .globalRequestParameters(
-                        singletonList(new springfox.documentation.builders.RequestParameterBuilder()
-                                .name("someGlobalParameter")
-                                .description("Description of someGlobalParameter")
-                                .in(ParameterType.QUERY)
-                                .required(true)
-                                .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
-                                .build()))
                 .tags(new Tag("Hello Service", "All apis relating to hello"))
                 .additionalModels(typeResolver.resolve(ErrorResponse.class));
     }
@@ -100,7 +85,6 @@ public class SwaggerConfig {
                 .scopeSeparator(",")
                 .additionalQueryStringParams(null)
                 .useBasicAuthenticationWithAccessCodeGrant(false)
-                .enableCsrfSupport(false)
                 .build();
     }
 
@@ -118,7 +102,6 @@ public class SwaggerConfig {
                 .maxDisplayedTags(null)
                 .operationsSorter(OperationsSorter.ALPHA)
                 .showExtensions(false)
-                .showCommonExtensions(false)
                 .tagsSorter(TagsSorter.ALPHA)
                 .supportedSubmitMethods(UiConfiguration.Constants.DEFAULT_SUBMIT_METHODS)
                 .validatorUrl(null)
